@@ -16,7 +16,9 @@ public class Container {
 
     private String name;
 
-    private Integer networkType;
+    private String networkMode;
+
+    private String restartPolicy;
 
     private List<PortBinding> portBindingList;
 
@@ -26,6 +28,8 @@ public class Container {
 
     @Data
     public static class PortBinding {
+
+        private String type;
 
         private String port;
 
@@ -37,7 +41,7 @@ public class Container {
 
         private String source;
 
-        private String destination;
+        private String target;
     }
 
     @Data

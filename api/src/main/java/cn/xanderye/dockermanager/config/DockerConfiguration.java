@@ -16,13 +16,12 @@ import java.util.List;
 @Configuration
 public class DockerConfiguration {
 
-    private static String path = "/var/lib/docker/container";
 
     private static List<Container> containerList;
 
     @PostConstruct
     public void init() throws FileNotFoundException {
-        if (!DockerUtil.checkContainerPath(path)) {
+        if (!DockerUtil.checkContainerPath()) {
             throw new FileNotFoundException("请先安装docker");
         }
 
