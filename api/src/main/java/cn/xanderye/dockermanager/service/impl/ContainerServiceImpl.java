@@ -97,9 +97,11 @@ public class ContainerServiceImpl implements ContainerService {
             for (String key : portBindsKeySet) {
                 Container.PortBinding portBinding = new Container.PortBinding();
                 String port = key.split("/")[0];
+                String type = key.split("/")[1];
                 String hostPort = portBinds.getJSONArray(key).getJSONObject(0).getString("HostPort");
                 portBinding.setPort(port);
                 portBinding.setHostPort(hostPort);
+                portBinding.setType(type);
                 portBindingList.add(portBinding);
             }
         }
