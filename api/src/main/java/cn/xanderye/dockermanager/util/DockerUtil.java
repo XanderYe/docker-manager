@@ -1,14 +1,10 @@
 package cn.xanderye.dockermanager.util;
 
-import cn.xanderye.dockermanager.entity.Container;
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Created on 2020/11/24.
@@ -17,7 +13,7 @@ import java.util.Set;
  */
 public class DockerUtil {
 
-    public static String path = "/var/lib/docker/containers";
+    public static String containerPath = "/var/lib/docker/containers";
 
     private final static String CONFIG_V2_FILE = "config.v2.json";
 
@@ -29,9 +25,20 @@ public class DockerUtil {
      * @author XanderYe
      * @date 2020/11/24
      */
-    public static boolean checkContainerPath() {
-        File file = new File(path);
-        return file.exists();
+    public static boolean checkDocker() {
+        try {
+            String res = SystemUtil.execStr("docker info");
+            if (res.contains("command not found")) {
+                return false;
+            } else {
+                String dockerRootDir = StringUtils.substringBetween(res, "Docker Root Dir", "Debug").trim();
+                containerPath = dockerRootDir + File.separator + "containers";
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     /**
@@ -42,7 +49,7 @@ public class DockerUtil {
      * @date 2020/11/25
      */
     public static File[] getContainerFiles() {
-        File containerFile = new File(path);
+        File containerFile = new File(containerPath);
         return containerFile.listFiles();
     }
 
@@ -94,7 +101,7 @@ public class DockerUtil {
      * @date 2020/11/25
      */
     public static JSONObject readConfigV2(String id) {
-        String configV2Path = path + File.separator + id + File.separator + CONFIG_V2_FILE;
+        String configV2Path = containerPath + File.separator + id + File.separator + CONFIG_V2_FILE;
         return readConfig(configV2Path);
     }
 
@@ -106,7 +113,7 @@ public class DockerUtil {
      * @date 2020/11/25
      */
     public static JSONObject readHostConfig(String id) {
-        String hostConfigPath = path + File.separator + id + File.separator + HOST_CONFIG_FILE;
+        String hostConfigPath = containerPath + File.separator + id + File.separator + HOST_CONFIG_FILE;
         return readConfig(hostConfigPath);
     }
 
@@ -119,7 +126,7 @@ public class DockerUtil {
      * @date 2020/11/25
      */
     public static boolean writeConfigV2(String id, JSONObject configV2) {
-        String configV2Path = path + File.separator + id + File.separator + CONFIG_V2_FILE;
+        String configV2Path = containerPath + File.separator + id + File.separator + CONFIG_V2_FILE;
         try {
             FileUtil.copyFile(configV2Path, configV2Path + ".bak");
         } catch (IOException e) {
@@ -137,7 +144,7 @@ public class DockerUtil {
      * @date 2020/11/25
      */
     public static boolean writeHostConfig(String id, JSONObject hostConfig) {
-        String hostConfigPath = path + File.separator + id + File.separator + HOST_CONFIG_FILE;
+        String hostConfigPath = containerPath + File.separator + id + File.separator + HOST_CONFIG_FILE;
         try {
             FileUtil.copyFile(hostConfigPath, hostConfigPath + ".bak");
         } catch (IOException e) {
