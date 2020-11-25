@@ -77,4 +77,31 @@ public interface ContainerService {
      * @date 2020/11/25
      */
     void saveContainerList(List<Container> containerList);
+
+    /**
+     * 启动容器
+     * @param
+     * @return java.lang.String
+     * @author XanderYe
+     * @date 2020/11/25
+     */
+    String startContainer(String id);
+
+    /**
+     * 停止容器
+     * @param
+     * @return java.lang.String
+     * @author XanderYe
+     * @date 2020/11/25
+     */
+    String stopContainer(String id);
+
+    /**
+     * 重启容器
+     * @param
+     * @return java.lang.String
+     * @author XanderYe
+     * @date 2020/11/25
+     */
+    String restartContainer(String id);
 }

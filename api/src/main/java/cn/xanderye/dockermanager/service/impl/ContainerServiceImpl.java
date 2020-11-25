@@ -4,6 +4,7 @@ import cn.xanderye.dockermanager.entity.Container;
 import cn.xanderye.dockermanager.service.ContainerService;
 import cn.xanderye.dockermanager.util.DockerUtil;
 import cn.xanderye.dockermanager.util.FileUtil;
+import cn.xanderye.dockermanager.util.SystemUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.stereotype.Service;
@@ -57,6 +58,15 @@ public class ContainerServiceImpl implements ContainerService {
         Container container = new Container();
         container.setId(configV2.getString("ID"));
         container.setName(configV2.getString("Name").substring(1));
+        JSONObject state = configV2.getJSONObject("State");
+        if (state.getBoolean("Running")) {
+            container.setState("运行中");
+        } else if (state.getBoolean("Paused")) {
+            container.setState("暂停中");
+        } else if (state.getBoolean("Restarting")) {
+            container.setState("重启中");
+        }
+
         JSONObject config = configV2.getJSONObject("Config");
         JSONArray envArray = config.getJSONArray("Env");
 
@@ -121,7 +131,10 @@ public class ContainerServiceImpl implements ContainerService {
     public Container getContainer(String id) {
         JSONObject configV2 = DockerUtil.readConfigV2(id);
         JSONObject hostConfig = DockerUtil.readHostConfig(id);
-        return parseConfig(configV2, hostConfig);
+        if (null != configV2 && null != hostConfig) {
+            return parseConfig(configV2, hostConfig);
+        }
+        return null;
     }
 
     @Override
@@ -237,8 +250,18 @@ public class ContainerServiceImpl implements ContainerService {
         hostConfig.put("RestartPolicy", restartPolicy);
 
         configV2.put("Config", config);
+
+        boolean needStop = null == container.getState() || "Running".equals(container.getState());
+        if (needStop) {
+            // 修改配置前停止容器
+            stopContainer(container.getId());
+        }
         DockerUtil.writeConfigV2(id, configV2);
         DockerUtil.writeHostConfig(id, hostConfig);
+        if (needStop) {
+            // 重启启动停止容器
+            startContainer(container.getId());
+        }
     }
 
     @Override
@@ -246,5 +269,20 @@ public class ContainerServiceImpl implements ContainerService {
         for (Container container : containerList) {
             saveContainer(container);
         }
+    }
+
+    @Override
+    public String startContainer(String id) {
+        return SystemUtil.execStr("docker start " + id);
+    }
+
+    @Override
+    public String stopContainer(String id) {
+        return SystemUtil.execStr("docker stop " + id);
+    }
+
+    @Override
+    public String restartContainer(String id) {
+        return SystemUtil.execStr("docker restart " + id);
     }
 }
