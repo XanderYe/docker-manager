@@ -1,6 +1,7 @@
 package cn.xanderye.dockermanager.base;
 
 import cn.xanderye.dockermanager.enums.ErrorCodeEnum;
+import com.alibaba.fastjson.JSON;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -42,5 +43,9 @@ public class ResultBean<T> implements Serializable {
 
     public static <T> ResultBean error(T data) {
         return new ResultBean<>().setCode(1).setData(data);
+    }
+
+    public String toJSONString() {
+        return JSON.toJSON(this).toString();
     }
 }

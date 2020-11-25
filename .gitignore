@@ -19,15 +19,10 @@ target/
 *.iml
 *.ipr
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
+### Node js ###
+dist/
+node_modules/
+package-lock.json
 
 ### VS Code ###
 .vscode/

@@ -1,5 +1,6 @@
 package cn.xanderye.dockermanager.security;
 
+import cn.xanderye.dockermanager.base.ResultBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -24,11 +25,9 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
         httpServletResponse.setHeader("Content-Type", "application/json;charset=utf-8");
         httpServletResponse.setStatus(200);
         PrintWriter writer = httpServletResponse.getWriter();
-        writer.write("{\n" +
-                "  \"code\": \"0\",\n" +
-                "  \"msg\": \"用户名或密码错误\",\n" +
-                "  \"data\": null\n" +
-                "}");
+        ResultBean<String> resultBean = new ResultBean<>();
+        resultBean.setMsg("登录成功");
+        writer.write(resultBean.toJSONString());
         writer.flush();
         writer.close();
     }

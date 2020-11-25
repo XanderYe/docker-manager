@@ -1,5 +1,7 @@
 package cn.xanderye.dockermanager.security;
 
+import cn.xanderye.dockermanager.base.ResultBean;
+import cn.xanderye.dockermanager.enums.ErrorCodeEnum;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
@@ -25,11 +27,7 @@ public class LoginFailureHandler implements AuthenticationFailureHandler {
         httpServletResponse.setHeader("Content-Type", "application/json;charset=utf-8");
         httpServletResponse.setStatus(200);
         PrintWriter writer = httpServletResponse.getWriter();
-        writer.write("{\n" +
-                "  \"code\": \"1\",\n" +
-                "  \"msg\": \"" + e.getMessage() + "\",\n" +
-                "  \"data\": null\n" +
-                "}");
+        writer.write(ResultBean.error(ErrorCodeEnum.LOGIN_ERROR).toJSONString());
         writer.flush();
         writer.close();
     }
