@@ -171,6 +171,8 @@ public class ContainerServiceImpl implements ContainerService {
         JSONObject configV2 = DockerUtil.readConfigV2(id);
         JSONObject hostConfig = DockerUtil.readHostConfig(id);
 
+        JSONObject config = configV2.getJSONObject("Config");
+
         // 设置环境变量
         List<Container.Env> envList = container.getEnvList();
         JSONArray envArray = new JSONArray();
@@ -179,7 +181,7 @@ public class ContainerServiceImpl implements ContainerService {
                 envArray.add(env.getKey() + "=" + env.getValue());
             }
         }
-        configV2.put("Env", envArray);
+        config.put("Env", envArray);
 
         // 设置映射路径
         List<Container.MountPoint> mountPointList = container.getMountPointList();
@@ -213,16 +215,20 @@ public class ContainerServiceImpl implements ContainerService {
         // 设置映射端口
         List<Container.PortBinding> portBindingList = container.getPortBindingList();
         JSONObject portBindings = new JSONObject(true);
+        JSONObject exposedPorts = new JSONObject(true);
         if (null != portBindingList && !portBindingList.isEmpty()) {
             for (Container.PortBinding portBinding : portBindingList) {
+                String name = portBinding.getPort() + "/" + portBinding.getType();
+                exposedPorts.put(name, new JSONObject());
                 JSONObject host = new JSONObject(true);
                 host.put("HostIp", "");
                 host.put("HostPort", portBinding.getHostPort());
                 JSONArray hostArray = new JSONArray();
                 hostArray.add(host);
-                portBindings.put(portBinding.getPort() + "/" + portBinding.getType(), hostArray);
+                portBindings.put(name, hostArray);
             }
         }
+        config.put("ExposedPorts", exposedPorts);
         hostConfig.put("PortBindings", portBindings);
 
         // 设置容器是否自动重启
@@ -230,6 +236,7 @@ public class ContainerServiceImpl implements ContainerService {
         restartPolicy.put("Name", container.getRestartPolicy());
         hostConfig.put("RestartPolicy", restartPolicy);
 
+        configV2.put("Config", config);
         DockerUtil.writeConfigV2(id, configV2);
         DockerUtil.writeHostConfig(id, hostConfig);
     }
