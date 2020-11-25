@@ -22,6 +22,7 @@ public interface ContainerService {
      * @date 2020/11/25
      */
     Container parseStatus(JSONObject configV2, JSONObject hostConfig);
+
     /**
      * 解析容器配置
      * @param configV2
@@ -57,7 +58,7 @@ public interface ContainerService {
      * @author XanderYe
      * @date 2020/11/25
      */
-    List<Container> getContainerConfigList() throws FileNotFoundException;
+    List<Container> getContainerConfigList();
 
     /**
      * 保存容器配置

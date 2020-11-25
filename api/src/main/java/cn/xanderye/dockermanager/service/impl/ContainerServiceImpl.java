@@ -124,11 +124,26 @@ public class ContainerServiceImpl implements ContainerService {
 
     @Override
     public List<Container> getContainerStatusList() {
-        return null;
+        File[] containers = DockerUtil.getContainerFiles();
+        List<Container> containerList = new ArrayList<>();
+        if (FileUtil.isNotEmpty(containers)) {
+            for (File container : containers) {
+                if (container.isDirectory()) {
+                    String id = container.getName();
+                    JSONObject configV2 = DockerUtil.readConfigV2(id);
+                    JSONObject hostConfig = DockerUtil.readHostConfig(id);
+                    Container ctn = parseStatus(configV2, hostConfig);
+                    containerList.add(ctn);
+                }
+            }
+        } else {
+            throw new RuntimeException("路径错误，未获取到容器配置");
+        }
+        return containerList;
     }
 
     @Override
-    public List<Container> getContainerConfigList() throws FileNotFoundException {
+    public List<Container> getContainerConfigList() {
         File[] containers = DockerUtil.getContainerFiles();
         List<Container> containerList = new ArrayList<>();
         if (FileUtil.isNotEmpty(containers)) {
@@ -142,7 +157,7 @@ public class ContainerServiceImpl implements ContainerService {
                 }
             }
         } else {
-            throw new FileNotFoundException("路径错误，未获取到容器配置");
+            throw new RuntimeException("路径错误，未获取到容器配置");
         }
         return containerList;
     }
