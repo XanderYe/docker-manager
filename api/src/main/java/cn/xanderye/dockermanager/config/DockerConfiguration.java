@@ -22,7 +22,7 @@ public class DockerConfiguration {
     @PostConstruct
     public void init() {
         String user = SystemUtil.execStr("whoami");
-        if (!"root".equals(user.trim())) {
+        if (!"root".equals(user)) {
             throw new BusinessException(ErrorCodeEnum.RUN_WITH_ROOT);
         }
         if (!DockerUtil.checkContainerPath()) {

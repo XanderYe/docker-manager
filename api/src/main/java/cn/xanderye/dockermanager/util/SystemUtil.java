@@ -66,7 +66,7 @@ public class SystemUtil {
                 sb.append(line).append(getLineBreak());
             }
             is.close();
-            return sb.toString();
+            return sb.toString().trim();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
