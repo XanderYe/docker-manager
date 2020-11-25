@@ -1,6 +1,8 @@
 package cn.xanderye.dockermanager.service.impl;
 
 import cn.xanderye.dockermanager.entity.Container;
+import cn.xanderye.dockermanager.enums.ErrorCodeEnum;
+import cn.xanderye.dockermanager.exception.BusinessException;
 import cn.xanderye.dockermanager.service.ContainerService;
 import cn.xanderye.dockermanager.util.DockerUtil;
 import cn.xanderye.dockermanager.util.FileUtil;
@@ -156,7 +158,7 @@ public class ContainerServiceImpl implements ContainerService {
                 }
             }
         } else {
-            throw new RuntimeException("路径错误，未获取到容器配置");
+            throw new BusinessException(ErrorCodeEnum.PATH_ERROR);
         }
         return containerList;
     }
@@ -176,7 +178,7 @@ public class ContainerServiceImpl implements ContainerService {
                 }
             }
         } else {
-            throw new RuntimeException("路径错误，未获取到容器配置");
+            throw new BusinessException(ErrorCodeEnum.PATH_ERROR);
         }
         return containerList;
     }
