@@ -38,6 +38,8 @@ public class ContainerServiceImpl implements ContainerService {
             container.setState("暂停中");
         } else if (state.getBoolean("Restarting")) {
             container.setState("重启中");
+        } else {
+            container.setState("已停止");
         }
         try {
             String dateString = state.getString("StartedAt").replace("T", " ");
@@ -65,6 +67,8 @@ public class ContainerServiceImpl implements ContainerService {
             container.setState("暂停中");
         } else if (state.getBoolean("Restarting")) {
             container.setState("重启中");
+        } else {
+            container.setState("已停止");
         }
 
         JSONObject config = configV2.getJSONObject("Config");

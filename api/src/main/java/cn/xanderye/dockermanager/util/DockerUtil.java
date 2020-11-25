@@ -31,7 +31,7 @@ public class DockerUtil {
             if (res.contains("command not found")) {
                 return false;
             } else {
-                String dockerRootDir = StringUtils.substringBetween(res, "Docker Root Dir", "Debug").trim();
+                String dockerRootDir = StringUtils.substringBetween(res, "Docker Root Dir:", "Debug").trim();
                 containerPath = dockerRootDir + File.separator + "containers";
                 return true;
             }
