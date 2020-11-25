@@ -2,6 +2,7 @@ package cn.xanderye.dockermanager.entity;
 
 import lombok.Data;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -16,9 +17,15 @@ public class Container {
 
     private String name;
 
+    private String state;
+
+    private String image;
+
     private String networkMode;
 
     private String restartPolicy;
+
+    private Date startTime;
 
     private List<PortBinding> portBindingList;
 
