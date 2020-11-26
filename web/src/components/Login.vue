@@ -63,6 +63,7 @@
             this.$requests.post("/login", form).then(res => {
               if (res.data.code === 0) {
                 this.$Message.success("登录成功");
+                localStorage.setItem("token", res.data.data);
                 setTimeout(() => {
                   this.$router.push({name: "index"});
                 }, 1000)
@@ -75,7 +76,7 @@
             })
           }
         })
-      }
+      },
     }
   }
 </script>

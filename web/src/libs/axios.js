@@ -28,6 +28,9 @@ const requests = {
         method: 'get',
         url,
         params: param,
+        headers: {
+          "token": localStorage.getItem("token")
+        }
       }).then(res => {
         this.error(res.data.code);
         resolve(res);
@@ -43,6 +46,9 @@ const requests = {
         method: 'post',
         url,
         data: param,
+        headers: {
+          "token": localStorage.getItem("token")
+        }
       }).then(res => {
         this.error(res.data.code);
         resolve(res);
@@ -60,7 +66,8 @@ const requests = {
         url,
         data: param,
         headers: {
-          "content-type": "multipart/form-data"
+          "content-type": "multipart/form-data",
+          "token": localStorage.getItem("token")
         }
       }).then(res => {
         resolve(res);
@@ -94,7 +101,7 @@ const requests = {
   error(status) {
     switch (status) {
       //请求没有权限状态码
-      case 403:
+      case 10001:
         router.replace({
           path: '/login'
         });
