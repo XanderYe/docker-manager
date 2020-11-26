@@ -16,11 +16,33 @@
     <Table highlight-row ref="containerTable" :columns="columns" :data="containerList" @on-current-change="selectContainer">
     </Table>
 
-    <Modal title="修改配置" v-model="configModal" :mask-closable="false" width="50%">
-      <Tabs value="mount">
-        <TabPane label="卷" name="mount">标签一的内容</TabPane>
-        <TabPane label="端口" name="port">标签二的内容</TabPane>
-        <TabPane label="环境" name="env">标签三的内容</TabPane>
+    <Modal id="configModal" title="修改配置" v-model="configModal" :mask-closable="false" width="50%">
+      <Tabs value="mount" v-if="container">
+        <TabPane label="卷" name="mount">
+          <div>
+            <Button type="primary" icon="md-add" @click="addMount"></Button>
+          </div>
+          <div class="table">
+            <div class="flex header">
+              <div class="column">文件/文件夹</div>
+              <div class="column">装载路径</div>
+              <div class="half-column">只读</div>
+              <div class="half-column">操作</div>
+            </div>
+            <div class="flex body" v-for="(volume, index) in container.mountPointList" :key="index">
+              <div class="column"><Input v-model="volume.source"/></div>
+              <div class="column"><Input v-model="volume.target"/></div>
+              <div class="half-column"><Checkbox size="large"></Checkbox></div>
+              <div class="half-column"><Button type="error" size="small" icon="md-remove" @click="removeMount(index)"></Button></div>
+            </div>
+          </div>
+        </TabPane>
+        <TabPane label="端口" name="port">
+          端口配置
+        </TabPane>
+        <TabPane label="环境" name="env">
+          环境变量配置
+        </TabPane>
       </Tabs>
     </Modal>
   </div>
@@ -216,6 +238,19 @@
         this.configModal = true;
         this.getContainerConfig();
       },
+      addMount() {
+        if (this.container) {
+          this.container.mountPointList.push({
+            source: "",
+            target: ""
+          })
+        }
+      },
+      removeMount(index) {
+        if (this.container && index < this.container.mountPointList.length) {
+          this.container.mountPointList.splice(index, 1);
+        }
+      },
       parseTime(last) {
         let text = "已运行 ";
         const mins = 60 * 1000;
@@ -242,6 +277,68 @@
   }
 </script>
 
-<style scoped>
+<style lang="less">
+  #configModal {
 
+    .ivu-modal-body {
+      height: 500px;
+    }
+    .table {
+      width: 100%;
+      overflow-y: auto;
+      height: 360px;
+      margin-top: 10px;
+
+      &::-webkit-scrollbar {
+        width: 9px;
+        height: 9px;
+      }
+
+      &::-webkit-scrollbar-track {
+        border-radius: 8px;
+        background-color: #ffffff;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        border-radius: 8px;
+        background-color: #d6d6d6;
+      }
+
+      .flex {
+        display: flex;
+      }
+      .header {
+        width: 100%;
+        font-weight: bold;
+        .column {
+          width: 31%;
+          position: relative;
+          margin-right: 10px;
+        }
+        .half-column {
+          width: 15%;
+          position: relative;
+          margin-right: 10px;
+          text-align: center;
+        }
+      }
+      .body {
+        width: 100%;
+        margin-top: 10px;
+        .column {
+          width: 31%;
+          position: relative;
+          margin: 0 10px 10px 0;
+        }
+        .half-column {
+          width: 15%;
+          position: relative;
+          margin-right: 10px;
+          display: flex;
+          align-items:center;
+          justify-content:center;
+        }
+      }
+    }
+  }
 </style>
