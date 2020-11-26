@@ -49,6 +49,8 @@ public class Container {
         private String source;
 
         private String target;
+
+        private Boolean readOnly;
     }
 
     @Data

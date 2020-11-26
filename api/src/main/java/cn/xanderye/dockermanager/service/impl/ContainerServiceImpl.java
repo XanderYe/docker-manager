@@ -100,6 +100,7 @@ public class ContainerServiceImpl implements ContainerService {
                 Container.MountPoint mountPoint = new Container.MountPoint();
                 mountPoint.setSource(jsonObject.getString("Source"));
                 mountPoint.setTarget(jsonObject.getString("Destination"));
+                mountPoint.setReadOnly(!jsonObject.getBoolean("RW"));
                 mountPointList.add(mountPoint);
             }
         }
@@ -212,7 +213,6 @@ public class ContainerServiceImpl implements ContainerService {
                 JSONObject conf = new JSONObject(true);
                 conf.put("Source", mountPoint.getSource());
                 conf.put("Destination", mountPoint.getTarget());
-                conf.put("RW", true);
                 conf.put("Name", "");
                 conf.put("Driver", "");
                 conf.put("Type", "bind");
@@ -221,6 +221,14 @@ public class ContainerServiceImpl implements ContainerService {
                 spec.put("Type", "bind");
                 spec.put("Source", mountPoint.getSource());
                 spec.put("Target", mountPoint.getTarget());
+                if (mountPoint.getReadOnly()) {
+                    conf.put("RW", false);
+                    conf.put("Relabel", "ro");
+                    spec.put("ReadOnly", true);
+                } else {
+                    conf.put("RW", true);
+                    conf.put("Relabel", "rw");
+                }
                 conf.put("Spec", spec);
                 conf.put("SkipMountpointCreation", false);
                 configMountPoints.put(mountPoint.getTarget(), conf);
