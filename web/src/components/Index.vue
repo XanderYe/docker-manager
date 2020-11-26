@@ -1,13 +1,28 @@
 <template>
   <div>
-    <div>
-      <Button :disabled="selectDisabled" style="width: 120px">编辑</Button>
-      <Select :disabled="selectDisabled" placeholder="操作" style="width: 120px">
-        <Option v-for="option in optionList" :key="option.id" :value="option.id" :disabled="option.disabled">{{option.name}}</Option>
-      </Select>
+    <div style="padding: 10px">
+      <Button :disabled="editDisabled" @click="openConfigModal" style="width: 120px">编辑</Button>
+      <Dropdown trigger="click" @on-click="controlContainer">
+        <Button type="primary" :disabled="selectDisabled" style="width: 120px">
+          操作
+          <Icon type="ios-arrow-down"></Icon>
+        </Button>
+        <DropdownMenu slot="list" style="width: 120px">
+          <DropdownItem v-for="option in optionList" :key="option.id" :name="option.id" :disabled="option.disabled">{{option.name}}</DropdownItem>
+        </DropdownMenu>
+      </Dropdown>
+
     </div>
-    <Table :columns="columns" :data="containerList">
+    <Table highlight-row ref="containerTable" :columns="columns" :data="containerList" @on-current-change="selectContainer">
     </Table>
+
+    <Modal title="修改配置" v-model="configModal" :mask-closable="false" width="50%">
+      <Tabs value="mount">
+        <TabPane label="卷" name="mount">标签一的内容</TabPane>
+        <TabPane label="端口" name="port">标签二的内容</TabPane>
+        <TabPane label="环境" name="env">标签三的内容</TabPane>
+      </Tabs>
+    </Modal>
   </div>
 </template>
 
@@ -16,8 +31,10 @@
     name: "Index",
     data() {
       return {
-        switchLoading: false,
+        configModal: false,
+        editDisabled: true,
         selectDisabled: true,
+        container: null,
         optionList: [
           {
             id: 1,
@@ -96,11 +113,67 @@
         this.$requests.get("/container/getContainerStatusList", {}).then(res => {
           if (res.data.code === 0) {
             this.containerList = res.data.data;
+            if (this.container != null) {
+              this.containerList.map(ctn => {
+                if (ctn.id === this.container.id) {
+                  ctn._highlight = true;
+                }
+                return ctn;
+              })
+            }
           }
         });
       },
+      getContainerConfig() {
+        if (this.container) {
+          this.$requests.get("/container/getContainerConfig", {id: this.container.id}).then(res => {
+            if (res.data.code === 0) {
+              this.container = res.data.data;
+            }
+          });
+        }
+      },
+      selectContainer(currentRow) {
+        this.container = currentRow;
+        this.selectDisabled = false;
+        switch (this.container.state) {
+          case "运行中": {
+            this.optionList[0].disabled = true;
+            this.optionList[1].disabled = false;
+            this.optionList[2].disabled = false;
+            this.editDisabled = true;
+          }
+            break;
+          case "已停止": {
+            this.optionList[0].disabled = false;
+            this.optionList[1].disabled = true;
+            this.optionList[2].disabled = true;
+            this.editDisabled = false;
+          }
+          break;
+          default: {
+            this.optionList[0].disabled = true;
+            this.optionList[1].disabled = true;
+            this.optionList[2].disabled = true;
+            this.editDisabled = true;
+          }
+          break;
+        }
+      },
+      controlContainer(value) {
+        switch (value) {
+          case 1:
+            this.startContainer(this.container.id);
+            break;
+          case 2:
+            this.stopContainer(this.container.id);
+            break;
+          case 3:
+            this.restartContainer(this.container.id);
+            break;
+        }
+      },
       switchContainer(container, value) {
-        this.switchLoading = true;
         if (value) {
           this.startContainer(container.id);
         } else {
@@ -111,51 +184,60 @@
         this.$requests.post("/container/start", {id: id}).then(res => {
           if (res.data.code === 0) {
             this.$Message.success("启动成功");
+            this.getContainerStatusList();
+            this.editDisabled = true;
           } else {
             this.$Message.error(res.data.msg);
           }
-          this.switchLoading = false;
         })
       },
       stopContainer(id) {
         this.$requests.post("/container/stop", {id: id}).then(res => {
           if (res.data.code === 0) {
             this.$Message.success("停止成功");
+            this.getContainerStatusList();
+            this.editDisabled = false;
           } else {
             this.$Message.error(res.data.msg);
           }
-          this.switchLoading = false;
         })
       },
       restartContainer(id) {
         this.$requests.post("/container/restart", {id: id}).then(res => {
           if (res.data.code === 0) {
             this.$Message.success("重启成功");
+            this.getContainerStatusList();
           } else {
             this.$Message.error(res.data.msg);
           }
-          this.switchLoading = false;
         })
       },
+      openConfigModal() {
+        this.configModal = true;
+        this.getContainerConfig();
+      },
       parseTime(last) {
-        let text = "Up for ";
+        let text = "已运行 ";
         const mins = 60 * 1000;
         const hours = 60 * mins;
         const days = 24 * hours;
         if (last < mins) {
-          text += "1 minutes";
+          text += " 1 分钟";
         } else if (last < hours) {
-          text += parseInt(last / mins) + " minutes";
+          text += parseInt(last / mins) + " 分钟";
         } else if (last < days) {
-          text += parseInt(last / hours) + " hours";
+          text += parseInt(last / hours) + " 小时";
         } else {
-          text += parseInt(last / days) + " days";
+          text += parseInt(last / days) + " 天";
         }
         return text;
       }
     },
     created() {
       this.getContainerStatusList();
+      var interval = setInterval(() => {
+        this.getContainerStatusList();
+      }, 3000)
     }
   }
 </script>

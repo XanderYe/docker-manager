@@ -1,5 +1,6 @@
 package cn.xanderye.dockermanager.interceptor;
 
+import cn.xanderye.dockermanager.constant.Constant;
 import cn.xanderye.dockermanager.enums.ErrorCodeEnum;
 import cn.xanderye.dockermanager.exception.BusinessException;
 import cn.xanderye.dockermanager.util.JwtUtil;
@@ -11,6 +12,7 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Arrays;
 
 /**
  * Created by Xander on 2018-11-05.
@@ -41,7 +43,9 @@ public class LoginInterceptor extends HandlerInterceptorAdapter {
         } catch (Exception e) {
             throw new BusinessException(ErrorCodeEnum.AUTHORIZATION_FAILED);
         }
-        log.info("remoteAddr={},  method={}, uri={}, username={}", remoteAddr, method, uri, username);
+        if (!Constant.IGNORED_URI_LIST.contains(uri)) {
+            log.info("remoteAddr={},  method={}, uri={}, username={}", remoteAddr, method, uri, username);
+        }
         return true;
     }
 

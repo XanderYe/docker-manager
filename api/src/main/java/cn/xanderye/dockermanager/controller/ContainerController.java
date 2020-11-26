@@ -1,6 +1,7 @@
 package cn.xanderye.dockermanager.controller;
 
 import cn.xanderye.dockermanager.base.ResultBean;
+import cn.xanderye.dockermanager.constant.Constant;
 import cn.xanderye.dockermanager.entity.Container;
 import cn.xanderye.dockermanager.enums.ErrorCodeEnum;
 import cn.xanderye.dockermanager.exception.BusinessException;
@@ -85,18 +86,30 @@ public class ContainerController {
     @PostMapping("start")
     public ResultBean start(@RequestBody JSONObject params) {
         String id = params.getString("id");
-        return new ResultBean<>(containerService.startContainer(id));
+        String res = containerService.startContainer(id);
+        if (res.contains(Constant.CONTAINER_ERROR)) {
+            return ResultBean.error(res);
+        }
+        return new ResultBean<>(res);
     }
 
     @PostMapping("stop")
     public ResultBean stop(@RequestBody JSONObject params) {
         String id = params.getString("id");
-        return new ResultBean<>(containerService.stopContainer(id));
+        String res = containerService.stopContainer(id);
+        if (res.contains(Constant.CONTAINER_ERROR)) {
+            return ResultBean.error(res);
+        }
+        return new ResultBean<>(res);
     }
 
     @PostMapping("restart")
     public ResultBean restart(@RequestBody JSONObject params) {
         String id = params.getString("id");
-        return new ResultBean(containerService.restartContainer(id));
+        String res = containerService.restartContainer(id);
+        if (res.contains(Constant.CONTAINER_ERROR)) {
+            return ResultBean.error(res);
+        }
+        return new ResultBean<>(res);
     }
 }
