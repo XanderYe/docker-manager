@@ -5,6 +5,7 @@ import cn.xanderye.dockermanager.entity.Container;
 import cn.xanderye.dockermanager.enums.ErrorCodeEnum;
 import cn.xanderye.dockermanager.exception.BusinessException;
 import cn.xanderye.dockermanager.service.ContainerService;
+import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,17 +83,20 @@ public class ContainerController {
     }
 
     @PostMapping("start")
-    public ResultBean start(String id) {
+    public ResultBean start(@RequestBody JSONObject params) {
+        String id = params.getString("id");
         return new ResultBean<>(containerService.startContainer(id));
     }
 
     @PostMapping("stop")
-    public ResultBean stop(String id) {
+    public ResultBean stop(@RequestBody JSONObject params) {
+        String id = params.getString("id");
         return new ResultBean<>(containerService.stopContainer(id));
     }
 
     @PostMapping("restart")
-    public ResultBean restart(String id) {
+    public ResultBean restart(@RequestBody JSONObject params) {
+        String id = params.getString("id");
         return new ResultBean(containerService.restartContainer(id));
     }
 }
