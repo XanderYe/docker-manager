@@ -29,7 +29,7 @@
 
 1. 下载1.0版本[docker-manager1.0.tar.gz](https://github.com/XanderYe/docker-manager/releases/download/1.0/dockermanager1.0.tar.gz)
 2. 解压dockermanager文件夹，编辑配置 `vim start.sh`，修改系统的用户名与密码
-3. 安装 java 1.8 运行环境<br/>Debian： `apt install -y openjdk-8-jdk`<br/>CentOS: `yum install -y java-1.8.0-openjdk`
+3. 安装 java 1.8 运行环境<br/>Debian: `apt install -y openjdk-8-jdk`<br/>CentOS: `yum install -y java-1.8.0-openjdk`
 4. 执行 `./start.sh`
 
 ### 自己编译
