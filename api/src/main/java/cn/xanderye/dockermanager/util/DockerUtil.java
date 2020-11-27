@@ -1,5 +1,6 @@
 package cn.xanderye.dockermanager.util;
 
+import cn.xanderye.dockermanager.constant.Constant;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
@@ -12,6 +13,8 @@ import java.io.*;
  * @author XanderYe
  */
 public class DockerUtil {
+
+    public static boolean systemd = true;
 
     public static String containerPath = "/var/lib/docker/containers";
 
@@ -27,6 +30,11 @@ public class DockerUtil {
      */
     public static boolean checkDocker() {
         try {
+            // 判断系统是否支持systemctl命令(已知wsl2有问题)
+            String service = SystemUtil.execStr("systemctl status docker");
+            systemd = !service.contains(Constant.SYSTEMD_ERROR);
+
+            // 获取docker配置路径
             String res = SystemUtil.execStr("docker info");
             if (res.contains("command not found")) {
                 return false;

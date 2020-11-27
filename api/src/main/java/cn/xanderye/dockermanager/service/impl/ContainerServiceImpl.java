@@ -53,7 +53,11 @@ public class ContainerServiceImpl implements ContainerService {
             e.printStackTrace();
         }
         JSONObject config = configV2.getJSONObject("Config");
-        container.setImage(config.getString("Image"));
+        String image = config.getString("Image");
+        if (!image.contains(":")) {
+            image += ":latest";
+        }
+        container.setImage(image);
         return container;
     }
 

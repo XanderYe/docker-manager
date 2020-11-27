@@ -17,7 +17,7 @@
     </Table>
 
     <Modal id="configModal" title="修改配置" v-model="configModal" :mask-closable="false" width="50%">
-      <Tabs value="mount" v-if="container">
+      <Tabs :value="defaultTab" v-if="container">
         <TabPane label="卷" name="mount">
           <div>
             <Button type="primary" icon="md-add" @click="addMount"></Button>
@@ -32,18 +32,50 @@
             <div class="flex body" v-for="(volume, index) in container.mountPointList" :key="index">
               <div class="column"><Input v-model="volume.source"/></div>
               <div class="column"><Input v-model="volume.target"/></div>
-              <div class="half-column"><Checkbox size="large"></Checkbox></div>
+              <div class="half-column"><Checkbox size="large" v-model="volume.readOnly"></Checkbox></div>
               <div class="half-column"><Button type="error" size="small" icon="md-remove" @click="removeMount(index)"></Button></div>
             </div>
           </div>
         </TabPane>
         <TabPane label="端口" name="port">
-          端口配置
+          <div>
+            <Button type="primary" icon="md-add" @click="addPortBinding"></Button>
+          </div>
+          <div class="table">
+            <div class="flex header">
+              <div class="column">本地端口</div>
+              <div class="column">容器端口</div>
+              <div class="half-column">操作</div>
+            </div>
+            <div class="flex body" v-for="(portBinding, index) in container.portBindingList" :key="index">
+              <div class="column"><Input v-model="portBinding.hostPort"/></div>
+              <div class="column"><Input v-model="portBinding.port"/></div>
+              <div class="half-column"><Button type="error" size="small" icon="md-remove" @click="removePortBinding(index)"></Button></div>
+            </div>
+          </div>
         </TabPane>
         <TabPane label="环境" name="env">
-          环境变量配置
+          <div>
+            <Button type="primary" icon="md-add" @click="addEnv"></Button>
+          </div>
+          <div class="table">
+            <div class="flex header">
+              <div class="column">本地端口</div>
+              <div class="column">容器端口</div>
+              <div class="half-column">操作</div>
+            </div>
+            <div class="flex body" v-for="(env, index) in container.envList" :key="index">
+              <div class="column"><Input v-model="env.key"/></div>
+              <div class="column"><Input v-model="env.value"/></div>
+              <div class="half-column"><Button type="error" size="small" icon="md-remove" @click="removeEnv(index)"></Button></div>
+            </div>
+          </div>
         </TabPane>
       </Tabs>
+      <div slot="footer">
+        <Button type="text" @click="configModal = false">取消</Button>
+        <Button type="primary" @click="saveContainer" :loading="configModalLoading">确认</Button>
+      </div>
     </Modal>
   </div>
 </template>
@@ -53,7 +85,9 @@
     name: "Index",
     data() {
       return {
+        defaultTab: "mount",
         configModal: false,
+        configModalLoading: false,
         editDisabled: true,
         selectDisabled: true,
         container: null,
@@ -235,14 +269,16 @@
         })
       },
       openConfigModal() {
-        this.configModal = true;
+        this.defaultTab = "mount";
         this.getContainerConfig();
+        this.configModal = true;
       },
       addMount() {
         if (this.container) {
           this.container.mountPointList.push({
             source: "",
-            target: ""
+            target: "",
+            readOnly: false
           })
         }
       },
@@ -250,6 +286,76 @@
         if (this.container && index < this.container.mountPointList.length) {
           this.container.mountPointList.splice(index, 1);
         }
+      },
+      addPortBinding() {
+        if (this.container) {
+          this.container.portBindingList.push({
+            type: "tcp",
+            port: "",
+            hostPort: ""
+          })
+        }
+      },
+      removePortBinding(index) {
+        if (this.container && index < this.container.portBindingList.length) {
+          this.container.portBindingList.splice(index, 1);
+        }
+      },
+      addEnv() {
+        if (this.container) {
+          this.container.envList.push({
+            key: "",
+            value: ""
+          })
+        }
+      },
+      removeEnv(index) {
+        if (this.container && index < this.container.envList.length) {
+          this.container.envList.splice(index, 1);
+        }
+      },
+      saveContainer() {
+        let emptyCount = 0;
+        let mountPointList = this.container.mountPointList;
+        emptyCount += mountPointList.filter(mountPoint => !mountPoint.source || !mountPoint.target).length;
+        let portBindingList = this.container.portBindingList;
+        emptyCount += portBindingList.filter(portBinding => !portBinding.type || !portBinding.port || !portBinding.hostPort).length;
+        let envList = this.container.envList;
+        emptyCount += envList.filter(env => !env.key && !env.value).length;
+        if (emptyCount > 0) {
+          this.$Message.error("请确认各项参数不能为空");
+          return;
+        }
+        this.configModalLoading = true;
+        this.$requests.post("/container/saveContainer", this.container).then(res => {
+          if (res.data.code === 0) {
+            setTimeout(() => {
+              this.configModal = false;
+              this.configModalLoading = false;
+              this.getContainerStatusList();
+            }, 300);
+            this.$Modal.confirm({
+              title: "提示",
+              content: "修改成功，需要重启docker服务才能生效，是否现在重启？",
+              loading: true,
+              onOk: () => {
+                this.$requests.post("/docker/restart", {}).then(res => {
+                  if (res.data.code === 0) {
+                    this.$Message.success("重启成功");
+                    this.$Modal.remove();
+                  } else {
+                    this.$Message.error(res.data.msg);
+                  }
+                })
+              }
+            });
+          } else {
+            this.$Message.error(res.data.msg);
+            setTimeout(() => {
+              this.configModalLoading = false;
+            }, 300);
+          }
+        })
       },
       parseTime(last) {
         let text = "已运行 ";
@@ -269,10 +375,16 @@
       }
     },
     created() {
-      this.getContainerStatusList();
-      var interval = setInterval(() => {
-        this.getContainerStatusList();
-      }, 3000)
+      this.$requests.get("docker/info", {}).then(res => {
+        if (res.data.code === 0) {
+          this.getContainerStatusList();
+          var interval = setInterval(() => {
+            this.getContainerStatusList();
+          }, 3000)
+        } else {
+          this.$Message.error(res.data.msg);
+        }
+      })
     }
   }
 </script>
@@ -333,7 +445,7 @@
         .half-column {
           width: 15%;
           position: relative;
-          margin-right: 10px;
+          margin: 0 10px 10px 0;
           display: flex;
           align-items:center;
           justify-content:center;
