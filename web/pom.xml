@@ -20,7 +20,7 @@
                 <version>1.6.0</version>
                 <executions>
                     <execution>
-                        <id>exec-npm-run-build</id>
+                        <id>exec-npm-install</id>
                         <phase>prepare-package</phase>
                         <goals>
                             <goal>exec</goal>
