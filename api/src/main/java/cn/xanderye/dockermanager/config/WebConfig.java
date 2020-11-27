@@ -7,6 +7,7 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import javax.servlet.Filter;
@@ -31,10 +32,18 @@ public class WebConfig implements WebMvcConfigurer {
                 .excludePathPatterns("/v2/api-docs-ext")
                 // swagger 静态资源
                 .excludePathPatterns("/webjars/**")
-                // 上传文件夹
+                // 静态资源
+                .excludePathPatterns("/")
                 .excludePathPatterns("/login")
+                .excludePathPatterns("/index.html")
+                .excludePathPatterns("/static/**")
                 .excludePathPatterns("/favicon.ico")
                 .excludePathPatterns("/error");
+    }
+
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("/**").addResourceLocations("classpath:/static/");
     }
 
     @Bean
