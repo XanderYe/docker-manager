@@ -11,7 +11,7 @@
           <DropdownItem v-for="option in optionList" :key="option.id" :name="option.id" :disabled="option.disabled">{{option.name}}</DropdownItem>
         </DropdownMenu>
       </Dropdown>
-
+      <Button type="text" @click="logout" style="float: right;">注销</Button>
     </div>
     <Table highlight-row ref="containerTable" :columns="columns" :data="containerList" @on-current-change="selectContainer">
     </Table>
@@ -81,6 +81,8 @@
 </template>
 
 <script>
+  import router from "../router";
+
   export default {
     name: "Index",
     data() {
@@ -358,6 +360,13 @@
           }
         })
       },
+      logout() {
+        this.$Message.success("注销成功");
+        localStorage.removeItem("token");
+        this.$router.replace({
+          path: '/login'
+        });
+      },
       parseTime(last) {
         let text = "已运行 ";
         const mins = 60 * 1000;
@@ -382,7 +391,7 @@
           var interval = setInterval(() => {
             this.getContainerStatusList();
           }, 3000)
-        } else {
+        } else if (res.data.code !== 10001) {
           this.$Message.error(res.data.msg);
         }
       })

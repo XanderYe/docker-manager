@@ -1,5 +1,6 @@
 <template>
   <div class="login">
+    <div class="logo"></div>
     <div class="login-con">
       <Card>
         <p slot="title">
@@ -85,7 +86,18 @@
   .login {
     width: 100%;
     height: 100%;
-    background: #FFF;
+    background-color: #E7E7E7;
+
+    .logo {
+      position: absolute;
+      left: 50%;
+      top: 5%;
+      width: 200px;
+      height: 200px;
+      margin-left: -100px;
+      background-image: url("../assets/docker-logo.png");
+      background-size: cover;
+    }
 
     .login-con {
       position: absolute;
