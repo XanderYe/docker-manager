@@ -31,7 +31,9 @@
 
 2. 解压dockermanager文件夹，编辑配置 `vim start.sh`，修改系统的用户名与密码
 
-3. 执行 `./start.sh`
+3. 安装 java 1.8 运行环境  Debian： `apt install -y openjdk-8-jdk` CentOS: `yum install -y java-1.8.0-openjdk`
+
+4. 执行 `./start.sh`
 
 ### 自己编译
 
