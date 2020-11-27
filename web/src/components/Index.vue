@@ -329,26 +329,27 @@
         this.configModalLoading = true;
         this.$requests.post("/container/saveContainer", this.container).then(res => {
           if (res.data.code === 0) {
+            this.configModal = false;
+            this.configModalLoading = false;
+
             setTimeout(() => {
-              this.configModal = false;
-              this.configModalLoading = false;
               this.getContainerStatusList();
+              this.$Modal.confirm({
+                title: "提示",
+                content: "修改成功，需要重启docker服务才能生效，是否现在重启？",
+                loading: true,
+                onOk: () => {
+                  this.$requests.post("/docker/restart", {}).then(res => {
+                    if (res.data.code === 0) {
+                      this.$Message.success("重启成功");
+                      this.$Modal.remove();
+                    } else {
+                      this.$Message.error(res.data.msg);
+                    }
+                  })
+                }
+              });
             }, 300);
-            this.$Modal.confirm({
-              title: "提示",
-              content: "修改成功，需要重启docker服务才能生效，是否现在重启？",
-              loading: true,
-              onOk: () => {
-                this.$requests.post("/docker/restart", {}).then(res => {
-                  if (res.data.code === 0) {
-                    this.$Message.success("重启成功");
-                    this.$Modal.remove();
-                  } else {
-                    this.$Message.error(res.data.msg);
-                  }
-                })
-              }
-            });
           } else {
             this.$Message.error(res.data.msg);
             setTimeout(() => {
